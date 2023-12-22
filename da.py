@@ -106,7 +106,7 @@ TT_RPAREN   	= 'RPAREN'
 TT_EOF			= 'EOF'
 
 KEYWORDS = [
-	'HEI'
+	'HEIL'
 ]
 
 class Token:
@@ -378,7 +378,7 @@ class Parser:
 	def expr(self):
 		res = ParseResult()
 
-		if self.current_tok.matches(TT_KEYWORD, 'HEI'):
+		if self.current_tok.matches(TT_KEYWORD, 'HEIL'):
 			res.register_advancement()
 			self.advance()
 
