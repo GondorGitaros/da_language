@@ -95,31 +95,31 @@ class Position:
 # TOKENS
 #######################################
 
-TT_INT				= 'INT'
-TT_FLOAT    	= 'FLOAT'
-TT_IDENTIFIER	= 'IDENTIFIER'
-TT_KEYWORD		= 'KEYWORD'
-TT_PLUS     	= 'PLUS'
-TT_MINUS    	= 'MINUS'
-TT_MUL      	= 'MUL'
-TT_DIV      	= 'DIV'
-TT_POW				= 'POW'
-TT_EQ					= 'EQ'
-TT_LPAREN   	= 'LPAREN'
-TT_RPAREN   	= 'RPAREN'
-TT_EE					= 'EE' #
-TT_NE					= 'NE' #
-TT_LT					= 'LT' #
-TT_GT					= 'GT' #
-TT_LTE				= 'LTE' #
-TT_GTE				= 'GTE' #
-TT_EOF				= 'EOF'
+TT_INT = 'INT'
+TT_FLOAT = 'FLOAT'
+TT_IDENTIFIER = 'IDENTIFIER'
+TT_KEYWORD = 'KEYWORD'
+TT_PLUS = 'PLUS'
+TT_MINUS = 'MINUS'
+TT_MUL = 'MUL'
+TT_DIV = 'DIV'
+TT_POW = 'POW'
+TT_EQ = 'EQ'
+TT_LPAREN = 'LPAREN'
+TT_RPAREN = 'RPAREN'
+TT_EE = 'EE' 
+TT_NE = 'NE' 
+TT_LT = 'LT' 
+TT_GT = 'GT' 
+TT_LTE = 'LTE' 
+TT_GTE = 'GTE'
+TT_EOF = 'EOF'
 
 KEYWORDS = [
-	'HEIL',
-	'UND', #
-	'ODER', #
-	'NEIN' #
+	'be',
+	'und', 
+	'or', 
+	'nah' 
 ]
 
 class Token:
@@ -380,7 +380,7 @@ class Parser:
 		if not res.error and self.current_tok.type != TT_EOF:
 			return res.failure(InvalidSyntaxError(
 				self.current_tok.pos_start, self.current_tok.pos_end,
-				"Expected '+', '-', '*', '/', '^', '==', '!=', '<', '>', <=', '>=', 'UND' or 'ODER'"
+				"Expected '+', '-', '*', '/', '^', '==', '!=', '<', '>', <=', '>=', 'und' or 'or'"
 			))
 		return res
 
@@ -445,7 +445,7 @@ class Parser:
 	def comp_expr(self):
 		res = ParseResult()
 
-		if self.current_tok.matches(TT_KEYWORD, 'NEIN'):
+		if self.current_tok.matches(TT_KEYWORD, 'nah'):
 			op_tok = self.current_tok
 			res.register_advancement()
 			self.advance()
@@ -459,7 +459,7 @@ class Parser:
 		if res.error:
 			return res.failure(InvalidSyntaxError(
 				self.current_tok.pos_start, self.current_tok.pos_end,
-				"Expected int, float, identifier, '+', '-', '(' or 'NEIN'"
+				"Expected int, float, identifier, '+', '-', '(' or 'nah'"
 			))
 
 		return res.success(node)
@@ -467,7 +467,7 @@ class Parser:
 	def expr(self):
 		res = ParseResult()
 
-		if self.current_tok.matches(TT_KEYWORD, 'HEIL'):
+		if self.current_tok.matches(TT_KEYWORD, 'be'):
 			res.register_advancement()
 			self.advance()
 
@@ -493,12 +493,12 @@ class Parser:
 			if res.error: return res
 			return res.success(VarAssignNode(var_name, expr))
 
-		node = res.register(self.bin_op(self.comp_expr, ((TT_KEYWORD, 'UND'), (TT_KEYWORD, 'ODER'))))
+		node = res.register(self.bin_op(self.comp_expr, ((TT_KEYWORD, 'und'), (TT_KEYWORD, 'or'))))
 
 		if res.error:
 			return res.failure(InvalidSyntaxError(
 				self.current_tok.pos_start, self.current_tok.pos_end,
-				"Expected 'VAR', int, float, identifier, '+', '-', '(' or 'NEIN'"
+				"Expected 'be', int, float, identifier, '+', '-', '(' or 'nah'"
 			))
 
 		return res.success(node)
@@ -623,7 +623,7 @@ class Number:
 			return Number(int(self.value or other.value)).set_context(self.context), None
 
 	def notted(self):
-		return Number(1 if self.value == 0 else 0).set_context(self.context), None
+		return Number(0 if self.value == 1 else 1).set_context(self.context), None
 
 	def copy(self):
 		copy = Number(self.value)
@@ -739,9 +739,9 @@ class Interpreter:
 			result, error = left.get_comparison_lte(right)
 		elif node.op_tok.type == TT_GTE:
 			result, error = left.get_comparison_gte(right)
-		elif node.op_tok.matches(TT_KEYWORD, 'UND'):
+		elif node.op_tok.matches(TT_KEYWORD, 'und'):
 			result, error = left.anded_by(right)
-		elif node.op_tok.matches(TT_KEYWORD, 'ODER'):
+		elif node.op_tok.matches(TT_KEYWORD, 'or'):
 			result, error = left.ored_by(right)
 
 		if error:
@@ -758,7 +758,7 @@ class Interpreter:
 
 		if node.op_tok.type == TT_MINUS:
 			number, error = number.multed_by(Number(-1))
-		elif node.op_tok.matches(TT_KEYWORD, 'NOT'):
+		elif node.op_tok.matches(TT_KEYWORD, 'nah'):
 			number, error = number.notted()
 
 		if error:
@@ -772,8 +772,8 @@ class Interpreter:
 
 global_symbol_table = SymbolTable()
 global_symbol_table.set("NULL", Number(0))
-global_symbol_table.set("FALSE", Number(0))
-global_symbol_table.set("TRUE", Number(1))
+global_symbol_table.set("NAH", Number(0))
+global_symbol_table.set("JA", Number(1))
 
 def run(fn, text):
 	# Generate tokens
