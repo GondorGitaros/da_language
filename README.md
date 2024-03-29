@@ -18,7 +18,7 @@ Here's an example of how to use da Language:
 python shell.py
 ```
 
-'''python
+```python
 da > HEI x = 5
 da > x + 3
-'''
+```
