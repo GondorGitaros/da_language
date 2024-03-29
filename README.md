@@ -21,4 +21,5 @@ python shell.py
 ```python
 da > HEI x = 5
 da > x + 3
+8
 ```
